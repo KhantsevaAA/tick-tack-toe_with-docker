@@ -1,0 +1,27 @@
+# version: '3.8'
+
+services:
+  app:
+    build: .
+    # command: xvfb-run python -m app.main  # Упрощенная команда
+    depends_on:
+      - redis
+    environment:
+      # - DISPLAY=${DISPLAY} 
+      - DISPLAY=host.docker.internal:0.0
+    volumes:
+      - .:/app         # проект
+      # - /tmp/.X11-unix:/tmp/.X11-unix
+
+    stdin_open: true
+    tty: true
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
