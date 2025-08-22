@@ -1,14 +1,16 @@
 import time
 import numpy as np
 import tkinter as tk
-from cache import GameCache
+from app.cache import GameCache
 from tkinter import messagebox, font
 
 class Game:
     def __init__(self, root, cache: GameCache):
+       
         self.start_time = time.time()
         self.cache = cache
-        
+        # self.player1=player1
+        # self.player2=player2
         self.game_id = "game_001"
         self.k = 0 #счётчик ходов
         self.p = np.zeros((10, 10), dtype=int) #разметка игрового поля 10 на 10
@@ -19,11 +21,12 @@ class Game:
         self.root.geometry("550x550")
         self.root.configure(bg='white')
         self.root.resizable(False, False)  
+        # self.root.eval('tk::PlaceWindow . center')
         self.root.update()
         self.create_window()
         
     def create_window(self):
-        font1 = font.Font(family="T-FLEX Type A", size=11)
+        font1 = ("T-FLEX Type A", 11)
         
         self.label1 = tk.Label(self.root, text="Игрок 1: O", font=font1, bg='white')
         self.label1.place(x=10, y=10, anchor="nw")
@@ -208,6 +211,7 @@ class Game:
             'start_time': self.start_time 
         }
         self.cache.save_state(self.game_id, state)
+        # self.cache.save_game_state(self.game_id, self.player1_name, self.player2_name, state)
         
         # self.event_handler.publish('game_state_saved', {
         #     'game_id': self.game_id,

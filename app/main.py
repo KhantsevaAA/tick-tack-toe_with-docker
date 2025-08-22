@@ -12,12 +12,14 @@
 #     game = Game(tk.Tk(), cache)
 #     game.load_state()
 #     game.run()  
-from game import Game
-from cache import GameCache
+from app.game import Game
+from app.cache import GameCache
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-def show_welcome(cache):
+def show_welcome(cache, root=None):
+    if root:
+        root.destroy()
     """Показать приветственное окно с выбором действий"""
     welcome = tk.Tk()
     welcome.title("Крестики-нолики")
@@ -46,7 +48,7 @@ def show_welcome(cache):
     # Кнопка продолжить (только если есть сохраненная игра)
     if has_saved_game:
         continue_btn = tk.Button(welcome, text="Продолжить игру", 
-                                command=lambda: continue_game(welcome, cache),
+                                command=lambda: start_main_game(cache, welcome),
                                 **button_style)
         continue_btn.pack(pady=10)
     else:
@@ -84,17 +86,27 @@ def start_new_game(welcome, cache):
     player2_entry = ttk.Entry(input,font=font_style, width=20 )
     player2_entry.pack(pady=5)
     player2_entry.insert(0, "Игрок 2")
+    # input.eval('tk::PlaceWindow . center')
+    
+    start=tk.Button(input, text="Старт", font=font_style,
+                    command=lambda:start_main_game(cache, input), width=12)
+    start.pack(side=tk.LEFT, pady=5, padx=10)
+    
+    return_btn=tk.Button(input, text="Назад", font=font_style,
+                    command=lambda:show_welcome(cache, input), width=12)
+    return_btn.pack(side=tk.RIGHT, pady=5,padx=10)
+    # start_main_game(cache)
     input.eval('tk::PlaceWindow . center')
     
     
-    # start_main_game(cache)
-    
 
-def continue_game(welcome, cache):
-    welcome.destroy()
-    start_main_game(cache)
+# def continue_game(welcome, cache):
+#     welcome.destroy()
+#     start_main_game(cache)
 
-def start_main_game(cache):
+def start_main_game(cache, root=None):
+    if root:
+        root.destroy()
     root = tk.Tk()
     game = Game(root, cache)
     
@@ -115,3 +127,4 @@ if __name__ == "__main__":
         # Если Redis недоступен, все равно показываем основное окно
         cache = GameCache()
         start_main_game(cache)
+        
