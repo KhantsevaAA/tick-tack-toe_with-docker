@@ -12,8 +12,8 @@
 #     game = Game(tk.Tk(), cache)
 #     game.load_state()
 #     game.run()  
-from app.game import Game
-from app.cache import GameCache
+from game import Game
+from cache import GameCache
 import tkinter as tk
 from tkinter import messagebox, ttk
 
@@ -29,7 +29,7 @@ def show_welcome(cache, root=None):
     
     welcome.eval('tk::PlaceWindow . center')
     
-    saved_state = cache.load_state("game_001")
+    players, saved_state = cache.load_game("game_001")
     has_saved_game = saved_state is not None
     
     font_style = ("T-FLEX Type A", 11)
@@ -48,7 +48,7 @@ def show_welcome(cache, root=None):
     # Кнопка продолжить (только если есть сохраненная игра)
     if has_saved_game:
         continue_btn = tk.Button(welcome, text="Продолжить игру", 
-                                command=lambda: start_main_game(cache, welcome),
+                                command=lambda: continue_game(cache, welcome),
                                 **button_style)
         continue_btn.pack(pady=10)
     else:
@@ -58,11 +58,15 @@ def show_welcome(cache, root=None):
         disabled_btn.pack(pady=10)
     
     welcome.mainloop()
-
+    
+def continue_game(cache, welcome):
+    welcome.destroy()
+    start_main_game(cache, 1)
+    
 def start_new_game(welcome, cache):
     """Начать новую игру"""
     welcome.destroy()
-    cache.r.delete("game:game_001")
+    # cache.r.delete("game:game_001")
     
     input = tk.Tk()
     input.title("Крестики-нолики")
@@ -71,7 +75,7 @@ def start_new_game(welcome, cache):
     input.resizable(False, False)
     font_style = ("T-FLEX Type A", 11)
     
-    player1_label=tk.Label(input, text="Игрок за крестики:", 
+    player1_label=tk.Label(input, text="Игрок за нолики:", 
                           font=font_style, bg='white')
     player1_label.pack(pady=5)
     
@@ -79,7 +83,7 @@ def start_new_game(welcome, cache):
     player1_entry.pack(pady=5)
     player1_entry.insert(0, "Игрок 1")
     
-    player2_label=tk.Label(input, text="Игрок за нолики:", 
+    player2_label=tk.Label(input, text="Игрок за крестики:", 
                           font=font_style, bg='white')
     player2_label.pack(pady=5)
     
@@ -89,7 +93,7 @@ def start_new_game(welcome, cache):
     # input.eval('tk::PlaceWindow . center')
     
     start=tk.Button(input, text="Старт", font=font_style,
-                    command=lambda:start_main_game(cache, input), width=12)
+                    command=lambda:start_new(cache, input), width=12)
     start.pack(side=tk.LEFT, pady=5, padx=10)
     
     return_btn=tk.Button(input, text="Назад", font=font_style,
@@ -98,21 +102,24 @@ def start_new_game(welcome, cache):
     # start_main_game(cache)
     input.eval('tk::PlaceWindow . center')
     
-    
+    def start_new(cache, input):
+        cache.r.delete("game:game_001")
+        player1 = player1_entry.get().strip() or "Игрок 1"
+        player2 = player2_entry.get().strip() or "Игрок 2"
+        cache.save_players(player1, player2)
+        input.destroy()    
+        start_main_game(cache, 0, player1, player2)        
 
-# def continue_game(welcome, cache):
-#     welcome.destroy()
-#     start_main_game(cache)
 
-def start_main_game(cache, root=None):
-    if root:
-        root.destroy()
+def start_main_game(cache, f=0, player1=None, player2=None):
     root = tk.Tk()
-    game = Game(root, cache)
+    game = Game(root, cache,player1, player2)
     
-    saved_state = cache.load_state("game_001")
+    players, saved_state = cache.load_game("game_001")
     if saved_state:
         game.load_state()
+   
+        
     
     root.protocol("WM_DELETE_WINDOW", game.on_close)
     
